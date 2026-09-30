@@ -35,26 +35,54 @@ public class TrimPickerScreen extends Screen {
 
         for (int i = 0; i < TrimData.PATTERNS.size(); i++) {
             final String p = TrimData.PATTERNS.get(i);
-            addDrawableChild(new IconButton(
-                left + (i % PER_ROW) * CELL, patY + (i / PER_ROW) * CELL, CELL - 2,
-                TrimData.patternIcon(p),
-                Text.literal(TrimData.pretty(p)),
-                () -> p.equals(selPattern), () -> false,
-                btn -> selPattern = p));
+            final var icon = new ItemStack(TrimData.patternIcon(p));
+            addDrawableChild(new ButtonWidget(
+                    left + (i % PER_ROW) * CELL, patY + (i / PER_ROW) * CELL,
+                    CELL - 2, CELL - 2,
+                    Text.literal(TrimData.pretty(p)),
+                    btn -> selPattern = p,
+                    DEFAULT_NARRATION_SUPPLIER) {
+                @Override
+                public void drawIcon(DrawContext ctx, int mx, int my, float delta) {
+                    ctx.drawItem(icon, getX() + 3, getY() + 3);
+                    if (p.equals(selPattern)) {
+                        int x = getX(), y = getY(), w = getWidth(), h = getHeight(), c = 0xFFFFFF55;
+                        ctx.fill(x, y, x + w, y + 1, c);
+                        ctx.fill(x, y + h - 1, x + w, y + h, c);
+                        ctx.fill(x, y, x + 1, y + h, c);
+                        ctx.fill(x + w - 1, y, x + w, y + h, c);
+                    }
+                }
+            });
         }
 
         int matY = patY + 2 * CELL + 28;
+
         for (int i = 0; i < TrimData.TRIM_MATERIALS.size(); i++) {
             final String[] m = TrimData.TRIM_MATERIALS.get(i);
-            addDrawableChild(new IconButton(
-                left + (i % PER_ROW) * CELL, matY + (i / PER_ROW) * CELL, CELL - 2,
-                TrimData.item(m[1]),
-                Text.literal(TrimData.pretty(m[0])),
-                () -> m[0].equals(selMaterial), () -> false,
-                btn -> selMaterial = m[0]));
+            final var icon = new ItemStack(TrimData.item(m[1]));
+            addDrawableChild(new ButtonWidget(
+                    left + (i % PER_ROW) * CELL, matY + (i / PER_ROW) * CELL,
+                    CELL - 2, CELL - 2,
+                    Text.literal(TrimData.pretty(m[0])),
+                    btn -> selMaterial = m[0],
+                    DEFAULT_NARRATION_SUPPLIER) {
+                @Override
+                public void drawIcon(DrawContext ctx, int mx, int my, float delta) {
+                    ctx.drawItem(icon, getX() + 3, getY() + 3);
+                    if (m[0].equals(selMaterial)) {
+                        int x = getX(), y = getY(), w = getWidth(), h = getHeight(), c = 0xFFFFFF55;
+                        ctx.fill(x, y, x + w, y + 1, c);
+                        ctx.fill(x, y + h - 1, x + w, y + h, c);
+                        ctx.fill(x, y, x + 1, y + h, c);
+                        ctx.fill(x + w - 1, y, x + w, y + h, c);
+                    }
+                }
+            });
         }
 
         int btnY = matY + 2 * CELL + 12;
+
         addDrawableChild(ButtonWidget.builder(Text.literal("Save"), btn -> {
             if (selPattern != null && selMaterial != null) {
                 TrimConfig.set(itemKey, new TrimConfig.Entry(selPattern, selMaterial));
