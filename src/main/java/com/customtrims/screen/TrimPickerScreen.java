@@ -8,6 +8,8 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrimPickerScreen extends Screen {
     private static final int CELL = 22;
@@ -18,6 +20,9 @@ public class TrimPickerScreen extends Screen {
     private final Item armorItem;
     private String selPattern;
     private String selMaterial;
+
+    private record IconEntry(ButtonWidget btn, ItemStack icon, String id, boolean isPattern) {}
+    private final List<IconEntry> iconEntries = new ArrayList<>();
 
     public TrimPickerScreen(Screen parent, String itemKey, Item armorItem) {
         super(Text.literal("Choose trim"));
@@ -30,72 +35,47 @@ public class TrimPickerScreen extends Screen {
 
     @Override
     protected void init() {
+        iconEntries.clear();
         int left = (width - PER_ROW * CELL) / 2;
         int patY = 60;
 
         for (int i = 0; i < TrimData.PATTERNS.size(); i++) {
             final String p = TrimData.PATTERNS.get(i);
-            final var icon = new ItemStack(TrimData.patternIcon(p));
-            addDrawableChild(new ButtonWidget(
-                    left + (i % PER_ROW) * CELL, patY + (i / PER_ROW) * CELL,
-                    CELL - 2, CELL - 2,
-                    Text.literal(TrimData.pretty(p)),
-                    btn -> selPattern = p,
-                    DEFAULT_NARRATION_SUPPLIER) {
-                @Override
-                public void drawIcon(DrawContext ctx, int mx, int my, float delta) {
-                    ctx.drawItem(icon, getX() + 3, getY() + 3);
-                    if (p.equals(selPattern)) {
-                        int x = getX(), y = getY(), w = getWidth(), h = getHeight(), c = 0xFFFFFF55;
-                        ctx.fill(x, y, x + w, y + 1, c);
-                        ctx.fill(x, y + h - 1, x + w, y + h, c);
-                        ctx.fill(x, y, x + 1, y + h, c);
-                        ctx.fill(x + w - 1, y, x + w, y + h, c);
-                    }
-                }
-            });
+            ButtonWidget btn = ButtonWidget.builder(Text.empty(), b -> selPattern = p)
+                .dimensions(left + (i % PER_ROW) * CELL, patY + (i / PER_ROW) * CELL, CELL - 2, CELL - 2)
+                .tooltip(net.minecraft.client.gui.tooltip.Tooltip.of(Text.literal(TrimData.pretty(p))))
+                .build();
+            addDrawableChild(btn);
+            iconEntries.add(new IconEntry(btn, new ItemStack(TrimData.patternIcon(p)), p, true));
         }
 
         int matY = patY + 2 * CELL + 28;
 
         for (int i = 0; i < TrimData.TRIM_MATERIALS.size(); i++) {
             final String[] m = TrimData.TRIM_MATERIALS.get(i);
-            final var icon = new ItemStack(TrimData.item(m[1]));
-            addDrawableChild(new ButtonWidget(
-                    left + (i % PER_ROW) * CELL, matY + (i / PER_ROW) * CELL,
-                    CELL - 2, CELL - 2,
-                    Text.literal(TrimData.pretty(m[0])),
-                    btn -> selMaterial = m[0],
-                    DEFAULT_NARRATION_SUPPLIER) {
-                @Override
-                public void drawIcon(DrawContext ctx, int mx, int my, float delta) {
-                    ctx.drawItem(icon, getX() + 3, getY() + 3);
-                    if (m[0].equals(selMaterial)) {
-                        int x = getX(), y = getY(), w = getWidth(), h = getHeight(), c = 0xFFFFFF55;
-                        ctx.fill(x, y, x + w, y + 1, c);
-                        ctx.fill(x, y + h - 1, x + w, y + h, c);
-                        ctx.fill(x, y, x + 1, y + h, c);
-                        ctx.fill(x + w - 1, y, x + w, y + h, c);
-                    }
-                }
-            });
+            ButtonWidget btn = ButtonWidget.builder(Text.empty(), b -> selMaterial = m[0])
+                .dimensions(left + (i % PER_ROW) * CELL, matY + (i / PER_ROW) * CELL, CELL - 2, CELL - 2)
+                .tooltip(net.minecraft.client.gui.tooltip.Tooltip.of(Text.literal(TrimData.pretty(m[0]))))
+                .build();
+            addDrawableChild(btn);
+            iconEntries.add(new IconEntry(btn, new ItemStack(TrimData.item(m[1])), m[0], false));
         }
 
         int btnY = matY + 2 * CELL + 12;
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Save"), btn -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal("Save"), b -> {
             if (selPattern != null && selMaterial != null) {
                 TrimConfig.set(itemKey, new TrimConfig.Entry(selPattern, selMaterial));
                 close();
             }
         }).dimensions(width / 2 - 105, btnY, 68, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Reset"), btn -> {
+        addDrawableChild(ButtonWidget.builder(Text.literal("Reset"), b -> {
             TrimConfig.remove(itemKey);
             close();
         }).dimensions(width / 2 - 34, btnY, 68, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Cancel"), btn -> close())
+        addDrawableChild(ButtonWidget.builder(Text.literal("Cancel"), b -> close())
             .dimensions(width / 2 + 37, btnY, 68, 20).build());
     }
 
@@ -106,6 +86,18 @@ public class TrimPickerScreen extends Screen {
         ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("Trims"), width / 2, 48, 0xFFFFFFFF);
         ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("Ores"),
             width / 2, 60 + 2 * CELL + 14, 0xFFFFFFFF);
+
+        for (IconEntry e : iconEntries) {
+            ctx.drawItem(e.icon(), e.btn().getX() + 3, e.btn().getY() + 3);
+            boolean sel = e.isPattern() ? e.id().equals(selPattern) : e.id().equals(selMaterial);
+            if (sel) {
+                int x = e.btn().getX(), y = e.btn().getY(), w = e.btn().getWidth(), h = e.btn().getHeight(), clr = 0xFFFFFF55;
+                ctx.fill(x,         y,         x + w, y + 1,     clr);
+                ctx.fill(x,         y + h - 1, x + w, y + h,     clr);
+                ctx.fill(x,         y,         x + 1, y + h,     clr);
+                ctx.fill(x + w - 1, y,         x + w, y + h,     clr);
+            }
+        }
     }
 
     @Override
