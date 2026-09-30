@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "customtrims",
+  "version": "${version}",
+  "name": "Custom Trims",
+  "description": "Client-side visual armor trims for any server.",
+  "authors": ["Artem"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.customtrims.CustomTrimsClient"],
+    "modmenu": ["com.customtrims.ModMenuIntegration"]
+  },
+  "mixins": [ { "config": "customtrims.mixins.json", "environment": "client" } ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
