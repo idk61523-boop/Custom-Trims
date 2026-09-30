@@ -1,0 +1,42 @@
+name: Build Custom Trims
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 9.2.0
+
+      - name: Resolve latest dependency versions for 1.21.11
+        run: |
+          latest() { curl -fsSL "$1" | grep -o "<version>[^<]*</version>" | sed 's/<[^>]*>//g' | grep -E "$2" | tail -1; }
+          echo "FABRIC_API=$(latest https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml '\+1\.21\.11$')" >> "$GITHUB_ENV"
+          echo "YARN=$(latest https://maven.fabricmc.net/net/fabricmc/yarn/maven-metadata.xml '^1\.21\.11\+build\.')" >> "$GITHUB_ENV"
+          echo "MODMENU=$(latest https://maven.terraformersmc.com/releases/com/terraformersmc/modmenu/maven-metadata.xml '^16\.')" >> "$GITHUB_ENV"
+
+      - name: Show versions
+        run: echo "fabric-api=$FABRIC_API yarn=$YARN modmenu=$MODMENU"
+
+      - name: Build
+        run: >
+          gradle build --no-daemon --stacktrace
+          -Pfabric_version="$FABRIC_API"
+          -Pyarn_mappings="$YARN"
+          -Pmodmenu_version="$MODMENU"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: custom-trims-jar
+          path: build/libs/*.jar
