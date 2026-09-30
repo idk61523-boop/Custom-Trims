@@ -5,6 +5,7 @@ import com.customtrims.TrimData;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
 public class CustomTrimsScreen extends Screen {
@@ -29,18 +30,27 @@ public class CustomTrimsScreen extends Screen {
                 final String key = mat + "_" + slot;
                 if (!TrimData.exists(key)) continue;
 
-                final var item = TrimData.item(key);
-                addDrawableChild(new IconButton(
-                    left + c * CELL, top + r * CELL, CELL - 2, item,
-                    Text.literal(TrimData.pretty(mat) + " " + TrimData.pretty(slot)),
-                    () -> false,
-                    () -> TrimConfig.get(key) != null,
-                    btn -> client.setScreen(new TrimPickerScreen(this, key, item))));
+                final var armorItem = TrimData.item(key);
+
+                addDrawableChild(new ButtonWidget(left + c * CELL, top + r * CELL, CELL - 2, CELL - 2,
+                        Text.literal(TrimData.pretty(mat) + " " + TrimData.pretty(slot)),
+                        btn -> client.setScreen(new TrimPickerScreen(this, key, armorItem)),
+                        DEFAULT_NARRATION_SUPPLIER) {
+                    @Override
+                    public void drawIcon(DrawContext ctx, int mx, int my, float delta) {
+                        ctx.drawItem(new ItemStack(armorItem), getX() + 4, getY() + 4);
+                        if (TrimConfig.get(key) != null) {
+                            ctx.fill(getX() + getWidth() - 6, getY() + 2,
+                                     getX() + getWidth() - 2, getY() + 6, 0xFF55FF55);
+                        }
+                    }
+                });
             }
         }
 
         addDrawableChild(ButtonWidget.builder(Text.literal("Done"), btn -> close())
-            .dimensions(width / 2 - 50, top + TrimData.SLOTS.size() * CELL + 16, 100, 20).build());
+            .dimensions(width / 2 - 50, top + TrimData.SLOTS.size() * CELL + 16, 100, 20)
+            .build());
     }
 
     @Override
@@ -48,7 +58,7 @@ public class CustomTrimsScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         ctx.drawCenteredTextWithShadow(textRenderer, title, width / 2, 16, 0xFFFFFFFF);
         ctx.drawCenteredTextWithShadow(textRenderer,
-            Text.literal("Click armor to choose a trim. Green dot = custom trim set."),
+            Text.literal("Click armor to choose trim. Green dot = trim set."),
             width / 2, 30, 0xFFAAAAAA);
     }
 
