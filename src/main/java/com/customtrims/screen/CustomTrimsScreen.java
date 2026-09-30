@@ -7,7 +7,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 
-/** Главное меню: строки = части брони, столбцы = материал брони. */
 public class CustomTrimsScreen extends Screen {
     private static final int CELL = 24;
     private final Screen parent;
@@ -25,21 +24,22 @@ public class CustomTrimsScreen extends Screen {
 
         for (int r = 0; r < TrimData.SLOTS.size(); r++) {
             for (int c = 0; c < cols; c++) {
-                String mat = TrimData.ARMOR_MATERIALS.get(c);
-                String slot = TrimData.SLOTS.get(r);
-                String key = mat + "_" + slot;
-                if (!TrimData.exists(key)) continue; // turtle есть только у шлема
+                final String mat = TrimData.ARMOR_MATERIALS.get(c);
+                final String slot = TrimData.SLOTS.get(r);
+                final String key = mat + "_" + slot;
+                if (!TrimData.exists(key)) continue;
 
-                var item = TrimData.item(key);
-                addDrawableChild(new IconButton(left + c * CELL, top + r * CELL, CELL - 2, item,
+                final var item = TrimData.item(key);
+                addDrawableChild(new IconButton(
+                    left + c * CELL, top + r * CELL, CELL - 2, item,
                     Text.literal(TrimData.pretty(mat) + " " + TrimData.pretty(slot)),
                     () -> false,
                     () -> TrimConfig.get(key) != null,
-                    b -> client.setScreen(new TrimPickerScreen(this, key, item))));
+                    btn -> client.setScreen(new TrimPickerScreen(this, key, item))));
             }
         }
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Done"), b -> close())
+        addDrawableChild(ButtonWidget.builder(Text.literal("Done"), btn -> close())
             .dimensions(width / 2 - 50, top + TrimData.SLOTS.size() * CELL + 16, 100, 20).build());
     }
 
