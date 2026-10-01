@@ -1,7 +1,7 @@
 package com.customtrims.mixin;
 
 import com.customtrims.TrimConfig;
-import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
@@ -13,7 +13,6 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
-import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -23,10 +22,10 @@ import java.util.Optional;
 @Mixin(ItemRenderer.class)
 public abstract class ItemRendererMixin {
 
-    @ModifyVariable(method = "renderGuiItemModel", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = "renderItem", at = @At("HEAD"), argsOnly = true)
     private ItemStack customtrims$injectTrim(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return stack;
-        if (stack.contains(DataComponentTypes.TRIM)) return stack; // уже есть трим — не трогаем
+        if (stack.contains(DataComponentTypes.TRIM)) return stack;
 
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.world == null) return stack;
@@ -48,7 +47,6 @@ public abstract class ItemRendererMixin {
 
         if (pat.isEmpty() || mat.isEmpty()) return stack;
 
-        // Возвращаем копию с тримом — оригинал не трогаем
         ItemStack copy = stack.copy();
         copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
         return copy;
