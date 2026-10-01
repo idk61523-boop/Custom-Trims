@@ -129,9 +129,9 @@ public class TrimPickerScreen extends Screen {
             originals = applyPreviewTrim();
         }
 
-        InventoryScreen.drawEntity(ctx, previewX - 28, previewY + 5,
-            previewX + 28, previewY - 85, scale,
-            mouseX, mouseY, 0f, 0f, 0f, client.player);
+        InventoryScreen.drawEntity(ctx, previewX, previewY, scale,
+            (float)(previewX - mouseX), (float)(previewY - 50 - mouseY),
+            0f, 0f, 0f, client.player);
 
         if (originals != null) {
             restoreStacks(originals);
