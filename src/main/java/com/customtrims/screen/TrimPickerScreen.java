@@ -4,24 +4,12 @@ import com.customtrims.TrimConfig;
 import com.customtrims.TrimData;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.equipment.trim.ArmorTrim;
-import net.minecraft.item.equipment.trim.ArmorTrimMaterial;
-import net.minecraft.item.equipment.trim.ArmorTrimPattern;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.entity.EquipmentSlot;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class TrimPickerScreen extends Screen {
     private static final int CELL = 22;
@@ -109,76 +97,6 @@ public class TrimPickerScreen extends Screen {
                 ctx.fill(x,         y,         x + 1, y + h,     clr);
                 ctx.fill(x + w - 1, y,         x + w, y + h,     clr);
             }
-        }
-
-        renderPlayerPreview(ctx, mouseX, mouseY);
-    }
-
-    private void renderPlayerPreview(DrawContext ctx, int mouseX, int mouseY) {
-        if (client == null || client.player == null || client.world == null) return;
-
-        int gridLeft = (width - PER_ROW * CELL) / 2;
-        int previewX = gridLeft / 2;
-        int previewY = height / 2 + 40;
-        int scale = 40;
-
-        ctx.fill(previewX - 28, previewY - 85, previewX + 28, previewY + 5, 0x55000000);
-
-        ItemStack[] originals = null;
-        if (selPattern != null && selMaterial != null) {
-            originals = applyPreviewTrim();
-        }
-
-        InventoryScreen.drawEntity(ctx, previewX, previewY, scale,
-            previewX - mouseX, previewY - 50 - mouseY,
-            0f, 0f, 0f, client.player);
-
-        if (originals != null) {
-            restoreStacks(originals);
-        }
-    }
-
-    private ItemStack[] applyPreviewTrim() {
-        DynamicRegistryManager reg = client.world.getRegistryManager();
-
-        Optional<RegistryEntry.Reference<ArmorTrimPattern>> patOpt = reg
-            .getOrThrow(RegistryKeys.TRIM_PATTERN)
-            .getOptional(RegistryKey.of(RegistryKeys.TRIM_PATTERN,
-                Identifier.of("minecraft", selPattern)));
-        Optional<RegistryEntry.Reference<ArmorTrimMaterial>> matOpt = reg
-            .getOrThrow(RegistryKeys.TRIM_MATERIAL)
-            .getOptional(RegistryKey.of(RegistryKeys.TRIM_MATERIAL,
-                Identifier.of("minecraft", selMaterial)));
-
-        if (patOpt.isEmpty() || matOpt.isEmpty()) return null;
-
-        ArmorTrim trim = new ArmorTrim(matOpt.get(), patOpt.get());
-
-        EquipmentSlot[] slots = {
-            EquipmentSlot.HEAD, EquipmentSlot.CHEST,
-            EquipmentSlot.LEGS, EquipmentSlot.FEET
-        };
-
-        ItemStack[] originals = new ItemStack[4];
-        for (int i = 0; i < slots.length; i++) {
-            originals[i] = client.player.getEquippedStack(slots[i]).copy();
-            ItemStack stack = client.player.getEquippedStack(slots[i]);
-            if (!stack.isEmpty() && !stack.contains(DataComponentTypes.TRIM)) {
-                ItemStack copy = stack.copy();
-                copy.set(DataComponentTypes.TRIM, trim);
-                client.player.equipStack(slots[i], copy);
-            }
-        }
-        return originals;
-    }
-
-    private void restoreStacks(ItemStack[] originals) {
-        EquipmentSlot[] slots = {
-            EquipmentSlot.HEAD, EquipmentSlot.CHEST,
-            EquipmentSlot.LEGS, EquipmentSlot.FEET
-        };
-        for (int i = 0; i < slots.length; i++) {
-            client.player.equipStack(slots[i], originals[i]);
         }
     }
 
