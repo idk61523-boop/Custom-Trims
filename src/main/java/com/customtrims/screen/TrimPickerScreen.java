@@ -82,7 +82,7 @@ public class TrimPickerScreen extends Screen {
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
-        ctx.drawItem(new ItemStack(armorItem), width / 2 - 8, 14);
+        ctx.drawItem(e.icon(), e.btn().getX() + (CELL - 18) / 2, e.btn().getY() + (CELL - 18) / 2);
         ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("Trims"), width / 2, 48, 0xFFFFFFFF);
         ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("Ores"),
             width / 2, 60 + 2 * CELL + 14, 0xFFFFFFFF);
