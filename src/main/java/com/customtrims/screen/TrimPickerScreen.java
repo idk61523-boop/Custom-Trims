@@ -88,7 +88,7 @@ public class TrimPickerScreen extends Screen {
             width / 2, 60 + 2 * CELL + 14, 0xFFFFFFFF);
 
         for (IconEntry e : iconEntries) {
-            ctx.drawItem(e.icon(), e.btn().getX() + 3, e.btn().getY() + 3);
+            ctx.drawItem(e.icon(), e.btn().getX() + (CELL - 18) / 2, e.btn().getY() + (CELL - 18) / 2);
             boolean sel = e.isPattern() ? e.id().equals(selPattern) : e.id().equals(selMaterial);
             if (sel) {
                 int x = e.btn().getX(), y = e.btn().getY(), w = e.btn().getWidth(), h = e.btn().getHeight(), clr = 0xFFFFFF55;
