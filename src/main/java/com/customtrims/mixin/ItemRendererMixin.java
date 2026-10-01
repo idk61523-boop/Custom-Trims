@@ -2,7 +2,8 @@ package com.customtrims.mixin;
 
 import com.customtrims.TrimConfig;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.equipment.trim.ArmorTrim;
@@ -12,6 +13,7 @@ import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,21 +21,23 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.Optional;
 
-@Mixin(ItemRenderer.class)
+@Mixin(HandledScreen.class)
 public abstract class ItemRendererMixin {
 
-    @ModifyVariable(method = "renderItem", at = @At("HEAD"), argsOnly = true)
-    private static ItemStack customtrims$injectTrim(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) return stack;
-        if (stack.contains(DataComponentTypes.TRIM)) return stack;
+    @ModifyVariable(method = "drawSlot", at = @At("HEAD"), argsOnly = true)
+    private Slot customtrims$modifySlot(Slot slot) {
+        if (slot == null || slot.getStack().isEmpty()) return slot;
+
+        ItemStack stack = slot.getStack();
+        if (stack.contains(DataComponentTypes.TRIM)) return slot;
 
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.world == null) return stack;
+        if (mc.world == null) return slot;
 
         String key = net.minecraft.registry.Registries.ITEM
             .getId(stack.getItem()).getPath();
         TrimConfig.Entry entry = TrimConfig.get(key);
-        if (entry == null) return stack;
+        if (entry == null) return slot;
 
         DynamicRegistryManager reg = mc.world.getRegistryManager();
         Optional<RegistryEntry.Reference<ArmorTrimPattern>> pat = reg
@@ -45,10 +49,11 @@ public abstract class ItemRendererMixin {
             .getOptional(RegistryKey.of(RegistryKeys.TRIM_MATERIAL,
                 Identifier.of("minecraft", entry.material())));
 
-        if (pat.isEmpty() || mat.isEmpty()) return stack;
+        if (pat.isEmpty() || mat.isEmpty()) return slot;
 
         ItemStack copy = stack.copy();
         copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
-        return copy;
+        slot.setStack(copy);
+        return slot;
     }
 }
