@@ -63,7 +63,7 @@ public class CustomTrimsScreen extends Screen {
 
         for (ArmorEntry e : entries) {
             int x = e.btn().getX(), y = e.btn().getY();
-            ctx.drawItem(e.icon(), x + 4, y + 4);
+            ctx.drawItem(e.icon(), x + (CELL - 18) / 2, y + (CELL - 18) / 2);
             if (TrimConfig.get(e.key()) != null)
                 ctx.fill(x + CELL - 8, y + 2, x + CELL - 4, y + 6, 0xFF55FF55);
         }
