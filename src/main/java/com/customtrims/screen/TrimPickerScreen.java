@@ -7,7 +7,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.equipment.trim.ArmorTrim;
@@ -19,8 +18,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.item.equipment.EquipmentSlot;
-
+import net.minecraft.entity.EquipmentSlot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -113,43 +111,34 @@ public class TrimPickerScreen extends Screen {
             }
         }
 
-        // Превью персонажа
         renderPlayerPreview(ctx, mouseX, mouseY);
     }
 
     private void renderPlayerPreview(DrawContext ctx, int mouseX, int mouseY) {
         if (client == null || client.player == null || client.world == null) return;
 
-        // Позиция превью — слева от сетки
         int gridLeft = (width - PER_ROW * CELL) / 2;
-        int previewX = gridLeft / 2;       // центр левой панели
-        int previewY = height / 2 + 40;   // чуть ниже середины
+        int previewX = gridLeft / 2;
+        int previewY = height / 2 + 40;
         int scale = 40;
 
-        // Фон
         ctx.fill(previewX - 28, previewY - 85, previewX + 28, previewY + 5, 0x55000000);
 
-        PlayerEntity player = client.player;
-
-        // Применяем трим временно если выбраны оба
-        ItemStack[] origStacks = null;
+        ItemStack[] originals = null;
         if (selPattern != null && selMaterial != null) {
-            origStacks = applyPreviewTrim(player);
+            originals = applyPreviewTrim();
         }
 
-        // Рендер модели
-        org.joml.Vector2f mouseVec = new org.joml.Vector2f(mouseX - previewX, mouseY - (previewY - 40));
-        InventoryScreen.drawEntity(ctx, previewX, previewY, scale, mouseVec,
-            new org.joml.Quaternionf(), null, player);
+        InventoryScreen.drawEntity(ctx, previewX, previewY, scale,
+            new org.joml.Vector2f(mouseX - previewX, mouseY - (previewY - 40)),
+            new org.joml.Quaternionf(), null, client.player);
 
-        // Восстанавливаем оригинальные стаки
-        if (origStacks != null) {
-            restoreStacks(player, origStacks);
+        if (originals != null) {
+            restoreStacks(originals);
         }
     }
 
-    /** Надевает копии стаков с тримом, возвращает оригиналы. */
-    private ItemStack[] applyPreviewTrim(PlayerEntity player) {
+    private ItemStack[] applyPreviewTrim() {
         DynamicRegistryManager reg = client.world.getRegistryManager();
 
         Optional<RegistryEntry.Reference<ArmorTrimPattern>> patOpt = reg
@@ -165,35 +154,31 @@ public class TrimPickerScreen extends Screen {
 
         ArmorTrim trim = new ArmorTrim(matOpt.get(), patOpt.get());
 
-        net.minecraft.entity.EquipmentSlot[] slots = {
-            net.minecraft.entity.EquipmentSlot.HEAD,
-            net.minecraft.entity.EquipmentSlot.CHEST,
-            net.minecraft.entity.EquipmentSlot.LEGS,
-            net.minecraft.entity.EquipmentSlot.FEET
+        EquipmentSlot[] slots = {
+            EquipmentSlot.HEAD, EquipmentSlot.CHEST,
+            EquipmentSlot.LEGS, EquipmentSlot.FEET
         };
 
         ItemStack[] originals = new ItemStack[4];
         for (int i = 0; i < slots.length; i++) {
-            originals[i] = player.getEquippedStack(slots[i]).copy();
-            ItemStack stack = player.getEquippedStack(slots[i]);
+            originals[i] = client.player.getEquippedStack(slots[i]).copy();
+            ItemStack stack = client.player.getEquippedStack(slots[i]);
             if (!stack.isEmpty() && !stack.contains(DataComponentTypes.TRIM)) {
                 ItemStack copy = stack.copy();
                 copy.set(DataComponentTypes.TRIM, trim);
-                player.equipStack(slots[i], copy);
+                client.player.equipStack(slots[i], copy);
             }
         }
         return originals;
     }
 
-    private void restoreStacks(PlayerEntity player, ItemStack[] originals) {
-        net.minecraft.entity.EquipmentSlot[] slots = {
-            net.minecraft.entity.EquipmentSlot.HEAD,
-            net.minecraft.entity.EquipmentSlot.CHEST,
-            net.minecraft.entity.EquipmentSlot.LEGS,
-            net.minecraft.entity.EquipmentSlot.FEET
+    private void restoreStacks(ItemStack[] originals) {
+        EquipmentSlot[] slots = {
+            EquipmentSlot.HEAD, EquipmentSlot.CHEST,
+            EquipmentSlot.LEGS, EquipmentSlot.FEET
         };
         for (int i = 0; i < slots.length; i++) {
-            player.equipStack(slots[i], originals[i]);
+            client.player.equipStack(slots[i], originals[i]);
         }
     }
 
