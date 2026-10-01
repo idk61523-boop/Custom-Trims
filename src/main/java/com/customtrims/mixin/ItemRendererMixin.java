@@ -23,7 +23,7 @@ import java.util.Optional;
 public abstract class ItemRendererMixin {
 
     @ModifyVariable(method = "renderItem", at = @At("HEAD"), argsOnly = true)
-    private ItemStack customtrims$injectTrim(ItemStack stack) {
+        private static ItemStack customtrims$injectTrim(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return stack;
         if (stack.contains(DataComponentTypes.TRIM)) return stack;
 
