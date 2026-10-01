@@ -4,12 +4,26 @@ import com.customtrims.TrimConfig;
 import com.customtrims.TrimData;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.equipment.trim.ArmorTrim;
+import net.minecraft.item.equipment.trim.ArmorTrimMaterial;
+import net.minecraft.item.equipment.trim.ArmorTrimPattern;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.item.equipment.EquipmentSlot;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TrimPickerScreen extends Screen {
     private static final int CELL = 22;
@@ -83,23 +97,3 @@ public class TrimPickerScreen extends Screen {
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
         ctx.drawItem(new ItemStack(armorItem), width / 2 - 8, 14);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("Trims"), width / 2, 48, 0xFFFFFFFF);
-        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("Ores"),
-            width / 2, 60 + 2 * CELL + 14, 0xFFFFFFFF);
-
-        for (IconEntry e : iconEntries) {
-            ctx.drawItem(e.icon(), e.btn().getX() + (CELL - 18) / 2, e.btn().getY() + (CELL - 18) / 2);
-            boolean sel = e.isPattern() ? e.id().equals(selPattern) : e.id().equals(selMaterial);
-            if (sel) {
-                int x = e.btn().getX(), y = e.btn().getY(), w = e.btn().getWidth(), h = e.btn().getHeight(), clr = 0xFFFFFF55;
-                ctx.fill(x,         y,         x + w, y + 1,     clr);
-                ctx.fill(x,         y + h - 1, x + w, y + h,     clr);
-                ctx.fill(x,         y,         x + 1, y + h,     clr);
-                ctx.fill(x + w - 1, y,         x + w, y + h,     clr);
-            }
-        }
-    }
-
-    @Override
-    public void close() { client.setScreen(parent); }
-}
