@@ -1,8 +1,6 @@
 package com.customtrims;
 
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
@@ -25,6 +23,9 @@ public class InvTrimRenderer {
             if (!(screen instanceof HandledScreen<?> handled)) return;
 
             ScreenEvents.afterRender(screen).register((scr, context, mouseX, mouseY, delta) -> {
+                int offsetX = (width - 176) / 2;
+                int offsetY = (height - 166) / 2;
+
                 for (Slot slot : handled.getScreenHandler().slots) {
                     ItemStack stack = slot.getStack();
                     if (stack.isEmpty()) continue;
@@ -51,10 +52,7 @@ public class InvTrimRenderer {
 
                     ItemStack copy = stack.copy();
                     copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
-                    int x = slot.x + handled.getX();
-                    int y = slot.y + handled.getY();
-                    
-                    context.drawItem(copy, x, y);
+                    context.drawItem(copy, offsetX + slot.x, offsetY + slot.y);
                 }
             });
         });
