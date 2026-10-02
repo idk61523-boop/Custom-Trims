@@ -51,8 +51,8 @@ public class InvTrimRenderer {
 
                     ItemStack copy = stack.copy();
                     copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
-                    int x = slot.x + (handled.width - 176) / 2 + 8;
-                    int y = slot.y + (handled.height - 166) / 2 + 18;
+                    int x = slot.x;
+                    int y = slot.y;
                     
                     context.drawItem(copy, x, y);
                 }
