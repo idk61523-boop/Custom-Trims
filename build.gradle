@@ -2,6 +2,10 @@ plugins {
     id 'fabric-loom' version "${loom_version}"
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/customtrims.accesswidener")
+}
+
 version = project.mod_version
 group = project.maven_group
 base { archivesName = project.archives_base_name }
