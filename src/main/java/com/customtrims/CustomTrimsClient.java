@@ -12,7 +12,7 @@ public class CustomTrimsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         TrimConfig.load();
-
+        InvTrimRenderer.register();
         // Кнопка "Custom Trims" в Options -> Skin Customization (внешний вид)
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof SkinOptionsScreen) {
