@@ -23,8 +23,8 @@ public class InvTrimRenderer {
             if (!(screen instanceof HandledScreen<?> handled)) return;
 
             ScreenEvents.afterRender(screen).register((scr, context, mouseX, mouseY, delta) -> {
-                int offsetX = (width - 176) / 2 + 8;
-                int offsetY = (height - 166) / 2 + 18;
+                int offsetX = (width - 176) / 2 + 5;
+                int offsetY = (height - 166) / 2 + 17;
 
                 for (Slot slot : handled.getScreenHandler().slots) {
                     ItemStack stack = slot.getStack();
