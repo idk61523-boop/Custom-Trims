@@ -51,7 +51,7 @@ public class InvTrimRenderer {
                     copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
                     // slot.x и slot.y уже содержат абсолютные координаты относительно окна
                     // drawItem рисует иконку размером 16x16, слот тоже 16x16
-                    context.drawItem(copy, slot.x, slot.y);
+                    context.drawItem(copy, handled.x + slot.x, handled.y + slot.y);
                 }
             });
         });
