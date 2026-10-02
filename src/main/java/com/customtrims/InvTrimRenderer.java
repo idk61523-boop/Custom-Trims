@@ -23,9 +23,6 @@ public class InvTrimRenderer {
             if (!(screen instanceof HandledScreen<?> handled)) return;
 
             ScreenEvents.afterRender(screen).register((scr, context, mouseX, mouseY, delta) -> {
-                int offsetX = (width - 176) / 2 + 5;
-                int offsetY = (height - 166) / 2 + 17;
-
                 for (Slot slot : handled.getScreenHandler().slots) {
                     ItemStack stack = slot.getStack();
                     if (stack.isEmpty()) continue;
@@ -52,7 +49,9 @@ public class InvTrimRenderer {
 
                     ItemStack copy = stack.copy();
                     copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
-                    context.drawItem(copy, offsetX + slot.x, offsetY + slot.y);
+                    // slot.x и slot.y уже содержат абсолютные координаты относительно окна
+                    // drawItem рисует иконку размером 16x16, слот тоже 16x16
+                    context.drawItem(copy, slot.x, slot.y);
                 }
             });
         });
