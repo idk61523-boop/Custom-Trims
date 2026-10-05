@@ -23,6 +23,8 @@ public class InvTrimRenderer {
             if (!(screen instanceof HandledScreen<?> handled)) return;
 
             ScreenEvents.afterRender(screen).register((scr, context, mouseX, mouseY, delta) -> {
+
+                // Рисуем трим на иконках в слотах
                 for (Slot slot : handled.getScreenHandler().slots) {
                     ItemStack stack = slot.getStack();
                     if (stack.isEmpty()) continue;
@@ -32,10 +34,9 @@ public class InvTrimRenderer {
                         .getId(stack.getItem()).getPath();
                     TrimConfig.Entry entry = TrimConfig.get(key);
                     if (entry == null) continue;
-
                     if (client.world == null) continue;
-                    DynamicRegistryManager reg = client.world.getRegistryManager();
 
+                    DynamicRegistryManager reg = client.world.getRegistryManager();
                     Optional<RegistryEntry.Reference<ArmorTrimPattern>> pat = reg
                         .getOrThrow(RegistryKeys.TRIM_PATTERN)
                         .getOptional(RegistryKey.of(RegistryKeys.TRIM_PATTERN,
@@ -44,14 +45,35 @@ public class InvTrimRenderer {
                         .getOrThrow(RegistryKeys.TRIM_MATERIAL)
                         .getOptional(RegistryKey.of(RegistryKeys.TRIM_MATERIAL,
                             Identifier.of("minecraft", entry.material())));
-
                     if (pat.isEmpty() || mat.isEmpty()) continue;
 
                     ItemStack copy = stack.copy();
                     copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
-                    // slot.x и slot.y уже содержат абсолютные координаты относительно окна
-                    // drawItem рисует иконку размером 16x16, слот тоже 16x16
                     context.drawItem(copy, handled.x + slot.x, handled.y + slot.y);
+                }
+
+                // Рисуем трим на предмете который держит курсор
+                ItemStack carried = handled.getScreenHandler().getCursorStack();
+                if (!carried.isEmpty() && !carried.contains(DataComponentTypes.TRIM)) {
+                    String key = net.minecraft.registry.Registries.ITEM
+                        .getId(carried.getItem()).getPath();
+                    TrimConfig.Entry entry = TrimConfig.get(key);
+                    if (entry != null && client.world != null) {
+                        DynamicRegistryManager reg = client.world.getRegistryManager();
+                        Optional<RegistryEntry.Reference<ArmorTrimPattern>> pat = reg
+                            .getOrThrow(RegistryKeys.TRIM_PATTERN)
+                            .getOptional(RegistryKey.of(RegistryKeys.TRIM_PATTERN,
+                                Identifier.of("minecraft", entry.pattern())));
+                        Optional<RegistryEntry.Reference<ArmorTrimMaterial>> mat = reg
+                            .getOrThrow(RegistryKeys.TRIM_MATERIAL)
+                            .getOptional(RegistryKey.of(RegistryKeys.TRIM_MATERIAL,
+                                Identifier.of("minecraft", entry.material())));
+                        if (pat.isPresent() && mat.isPresent()) {
+                            ItemStack copy = carried.copy();
+                            copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
+                            context.drawItem(copy, mouseX - 8, mouseY - 8);
+                        }
+                    }
                 }
             });
         });
