@@ -50,7 +50,7 @@ public class InvTrimRenderer {
                     ItemStack copy = stack.copy();
                     copy.set(DataComponentTypes.TRIM, new ArmorTrim(mat.get(), pat.get()));
                     context.drawItem(copy, handled.x + slot.x, handled.y + slot.y);
-                    context.drawItemInSlot(client.textRenderer, copy, handled.x + slot.x, handled.y + slot.y);
+                    context.drawStackOverlay(client.textRenderer, copy, handled.x + slot.x, handled.y + slot.y);
                 }
 
                 // Рисуем трим на предмете который держит курсор
