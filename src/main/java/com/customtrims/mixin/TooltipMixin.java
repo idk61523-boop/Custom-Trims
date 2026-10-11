@@ -23,7 +23,7 @@ import java.util.Optional;
 @Mixin(Screen.class)
 public abstract class TooltipMixin {
 
-    @ModifyVariable(method = "renderTooltip(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/item/ItemStack;II)V",
+    @ModifyVariable(method = "renderTooltip(Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;Ljava/util/Optional;Lnet/minecraft/item/ItemStack;II)V",
         at = @At("HEAD"), argsOnly = true)
     private ItemStack customtrims$injectTooltipTrim(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return stack;
