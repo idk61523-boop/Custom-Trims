@@ -1,5 +1,6 @@
 package com.customtrims.mixin;
 
+import com.customtrims.ShieldApplier;
 import com.customtrims.TrimConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -30,6 +31,10 @@ public abstract class DrawContextMixin {
     )
     private ItemStack customtrims$addTrim(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return stack;
+
+        ItemStack shield = ShieldApplier.apply(stack);
+        if (shield != stack) return shield;
+
         if (stack.contains(DataComponentTypes.TRIM)) return stack;
 
         TrimConfig.Entry entry = TrimConfig.get(Registries.ITEM.getId(stack.getItem()).getPath());
