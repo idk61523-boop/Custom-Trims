@@ -11,7 +11,7 @@ public final class TrimData {
 
     public static final List<String> SLOTS = List.of("helmet", "chestplate", "leggings", "boots");
     public static final List<String> ARMOR_MATERIALS =
-        List.of("leather", "chainmail", "iron", "golden", "diamond", "netherite", "turtle");
+        List.of("leather", "chainmail", "copper", "iron", "golden", "diamond", "netherite", "turtle");
 
     public static final List<String> PATTERNS = List.of(
         "sentry", "dune", "coast", "wild", "ward", "eye", "vex", "tide", "snout",
