@@ -48,8 +48,13 @@ public class CustomTrimsScreen extends Screen {
             }
         }
 
+        int btnY = top + TrimData.SLOTS.size() * CELL + 16;
+        addDrawableChild(ButtonWidget.builder(Text.literal("Shield"),
+                b -> client.setScreen(new ShieldPickerScreen(this)))
+            .dimensions(width / 2 - 106, btnY, 100, 20)
+            .build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Done"), b -> close())
-            .dimensions(width / 2 - 50, top + TrimData.SLOTS.size() * CELL + 16, 100, 20)
+            .dimensions(width / 2 + 6, btnY, 100, 20)
             .build());
     }
 
