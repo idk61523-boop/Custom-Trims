@@ -3,6 +3,6 @@
   "minVersion": "0.8",
   "package": "com.customtrims.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["EquipmentRendererMixin", "DrawContextMixin", "ItemModelManagerMixin"],
+  "client": ["EquipmentRendererMixin", "DrawContextMixin", "ItemModelManagerMixin", "ShieldModelRendererMixin"],
   "injectors": { "defaultRequire": 1 }
 }
