@@ -1,11 +1,11 @@
 package com.customtrims;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.BannerPatternsComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.DyeColor;
@@ -14,21 +14,23 @@ import net.minecraft.util.Identifier;
 public final class ShieldApplier {
     public record Built(DyeColor base, BannerPatternsComponent patterns) {}
 
+    /** true только пока игра готовит модель предмета для НАШЕГО игрока (включают миксины). */
+    public static boolean active = false;
+
     private static Built cache;
     private static Object cacheRegistry;
     private static int cacheVersion = -1;
 
     private ShieldApplier() {}
 
-    /** Возвращает копию щита с баннером из конфига либо исходный стак. */
-    public static ItemStack apply(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) return stack;
-        if (!"shield".equals(Registries.ITEM.getId(stack.getItem()).getPath())) return stack;
-        if (ShieldConfig.get() == null) return stack;
-        if (hasRealBanner(stack)) return stack;
+    /** Подменяет данные, которые читает рендер щита. Сам предмет не трогаем. */
+    public static ComponentMap modify(ComponentMap original, ItemStack stack) {
+        if (!active || stack == null || stack.isEmpty()) return original;
+        if (ShieldConfig.get() == null) return original;
+        if (hasRealBanner(stack)) return original;
 
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.world == null) return stack;
+        if (mc.world == null) return original;
         DynamicRegistryManager reg = mc.world.getRegistryManager();
 
         if (cache == null || cacheRegistry != reg || cacheVersion != ShieldConfig.version()) {
@@ -36,7 +38,7 @@ public final class ShieldApplier {
             cacheRegistry = reg;
             cacheVersion = ShieldConfig.version();
         }
-        return withBuilt(stack, cache);
+        return withBuilt(stack, cache).getImmutableComponents();
     }
 
     private static boolean hasRealBanner(ItemStack stack) {
